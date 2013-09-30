@@ -410,9 +410,18 @@ e"" />
         }
 
         [Test]
-        public void Merge_Simplest()
+        public void Merge_SingleElementAbsent()
         {
             string source = El("A").MakeString();
+            string transform = Trans("A", El("Child", At("xdt:Transform", "Merge"))).MakeString();
+            string expected = El("A", El("Child")).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_SingleElementPresent()
+        {
+            string source = El("A", El("Child")).MakeString();
             string transform = Trans("A", El("Child", At("xdt:Transform", "Merge"))).MakeString();
             string expected = El("A", El("Child")).MakeString();
             Check(source, transform, expected);
@@ -454,16 +463,39 @@ e"" />
         }
 
         [Test]
-        public void Merge_WithOtherTransformationSpecifiedForItsChildAbsentInSource_OtherTransformExecuted()
+        public void Merge_TransformSpecifiesSomNonKeyAttributes_AttributesAreMergedCorrectly()
+        {
+            string source = El("A",
+                               El("Child", At("key", "num1"), At("old", "old-value"))).MakeString();
+            string transform = Trans("A",
+                                     El("Child", At("key", "num1"), At("new", "new-value"), At("xdt:Transform", "Merge(key)"))).MakeString();
+            string expected = El("A",
+                                 El("Child", At("key", "num1"), At("old", "old-value"), At("new", "new-value"))).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_SeveralChildsWithTheNameExists_MergeRespectsKeyAttributes()
+        {
+            string source = El("A",
+                               El("Child", At("key", "num1")),
+                               El("Child", At("key", "num2")),
+                               El("Child", At("key", "num3"))).MakeString();
+            string transform = Trans("A",
+                                     El("Child", At("key", "num2"), At("new", "new-value"), At("xdt:Transform", "Merge(key)"))).MakeString();
+            string expected = El("A",
+                               El("Child", At("key", "num1")),
+                               El("Child", At("key", "num2"), At("new", "new-value")),
+                               El("Child", At("key", "num3"))).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_ArgumentAttributeNotPresent_Error()
         {
             string source = El("A", El("Child")).MakeString();
-            string transform = Trans("A",
-                                     El("Child", At("xdt:Transform", "Merge"),
-                                        El("Subchild", At("my-attr", "my-value"), At("xdt:Transform", "SetAttributes(my-attr)")))).MakeString();
-            string expected = El("A",
-                                 El("Child",
-                                    El("Subchild", At("my-attr", "my-value")))).MakeString();
-            Check(source, transform, expected);
+            string transform = Trans("A", El("Child", At("xdt:Transform", "Merge(x)"))).MakeString();
+            Check(source, transform, string.Empty, expectSuccess: false);
         }
 
         [Test]
@@ -484,7 +516,7 @@ e"" />
             Check(source, transform, expected, identChars: null);
         }
 
-        private void Check(string source, string transform, string expected, string identChars = "  ", [CallerMemberName] string testName = "")
+        private void Check(string source, string transform, string expected, bool expectSuccess = true, string identChars = "  ", [CallerMemberName] string testName = "")
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -504,11 +536,13 @@ e"" />
                 IndentChars = identChars
             };
 
-            Assert.IsTrue(task.Execute(resultFile));
-
-            string fileContent = File.ReadAllText(resultFile, Encoding.UTF8);
-
-            Assert.AreEqual(expected, fileContent);
+            bool success = task.Execute(resultFile);
+            Assert.AreEqual(expectSuccess, success);
+            if (expectSuccess)
+            {
+                string fileContent = File.ReadAllText(resultFile, Encoding.UTF8);
+                Assert.AreEqual(expected, fileContent);
+            }
         }
 
         private XmlElementCtor El(string name, params XmlNodeCtor[] content)
