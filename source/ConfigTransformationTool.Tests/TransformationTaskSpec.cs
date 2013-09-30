@@ -2,12 +2,16 @@
 // Outcold Solutions (http://outcoldman.com)
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
+using OutcoldSolutions.ConfigTransformationTool.ExtendedTranforms;
+
 namespace OutcoldSolutions.ConfigTransformationTool.Suites
 {
     using System;
     using System.IO;
     using System.Text;
-
     using NUnit.Framework;
 
     [TestFixture]
@@ -403,6 +407,94 @@ e"" />
             string fileContent = File.ReadAllText(resultFile, Encoding.UTF8);
 
             Assert.AreEqual(Result, fileContent);
+        }
+
+        [Test]
+        public void Merge_Simplest()
+        {
+            string source = El("A").MakeString();
+            string transform = Trans("A", El("Child", At("xdt:Transform", "Merge"))).MakeString();
+            string expected = El("A", El("Child")).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_ExistingElementHasDifferentNamespace_AnotherElementCreated()
+        {
+            string source = El("A", MyNs("a"), El("a:Child")).MakeString();
+            string transform = Trans("A", El("Child", At("xdt:Transform", "Merge"))).MakeString();
+            string expected = El("A", MyNs("a"), El("a:Child"), El("Child")).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_WithSubchildren()
+        {
+            string source = El("A").MakeString();
+            string transform = Trans("A",
+                                     El("Child", At("xdt:Transform", "Merge"),
+                                        El("Subchild"))).MakeString();
+            string expected = El("A", El("Child", El("Subchild"))).MakeString();
+            Check(source, transform, expected);
+        }
+
+        private void Check(string source, string transform, string expected, [CallerMemberName] string testName = "")
+        {
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            string sourceFile = Path.Combine(baseDirectory, testName + ".source.xml");
+            string transformFile = Path.Combine(baseDirectory, testName + ".transform.xml");
+            string resultFile = Path.Combine(baseDirectory, testName + ".result.xml");
+
+            // Create source file
+            this.WriteToFile(sourceFile, source, Encoding.UTF8);
+
+            // Create transform file
+            this.WriteToFile(transformFile, transform, Encoding.UTF8);
+
+            TransformationTask task = new TransformationTask(this.Log, sourceFile, transformFile, preserveWhitespace: true)
+            {
+                Indent = true,
+                IndentChars = "  "
+            };
+
+            Assert.IsTrue(task.Execute(resultFile));
+
+            string fileContent = File.ReadAllText(resultFile, Encoding.UTF8);
+
+            Assert.AreEqual(expected, fileContent);
+        }
+
+        private XmlElementCtor El(string name, params XmlNodeCtor[] content)
+        {
+            return new XmlElementCtor(name, content);
+        }
+
+        private XmlElementCtor Trans(string name, params XmlNodeCtor[] content)
+        {
+            return new XmlElementCtor(name, new XmlNodeCtor[] {XdtNs(), XdtImport()}.Concat(content).ToArray());
+        }
+
+        private XmlAttributeCtor At(string name, string value)
+        {
+            return new XmlAttributeCtor(name, value);
+        }
+
+        private XmlAttributeCtor XdtNs()
+        {
+            return new XmlAttributeCtor("xmlns:xdt", "http://schemas.microsoft.com/XML-Document-Transform");
+        }
+
+        private XmlAttributeCtor MyNs(string id)
+        {
+            return new XmlAttributeCtor("xmlns:" + id, "http://my-ns.org/" + id);
+        }
+
+        private XmlElementCtor XdtImport()
+        {
+            return new XmlElementCtor("xdt:Import",
+                                      At("assembly", "ctt.console"),
+                                      At("namespace", typeof (Merge).Namespace));
         }
     }
 }
