@@ -144,9 +144,11 @@ namespace OutcoldSolutions.ConfigTransformationTool
                     }
                 }
 
-                this.log.WriteLine("Transformation task is using encoding '{0}'. Change encoding in source file if you want to change encoding.", encoding);
+                var transformEncoding = GetXmlFileEncoding(this.TransformFile);
 
-                var transformFile = File.ReadAllText(this.TransformFile, encoding);
+                this.log.WriteLine("Transformation task is using encoding '{0}'.", transformEncoding);
+
+                var transformFile = File.ReadAllText(this.TransformFile, transformEncoding);
 
                 if ((this.parameters != null && this.parameters.Count > 0) || forceParametersTask)
                 {
@@ -183,6 +185,17 @@ namespace OutcoldSolutions.ConfigTransformationTool
             {
                 this.log.WriteLine("Exception while transforming: {0}.", e);
                 return false;
+            }
+        }
+
+        private Encoding GetXmlFileEncoding(string transformFile)
+        {
+            using (var xr = XmlReader.Create(transformFile))
+            {
+                if (!xr.Read()) return Encoding.Unicode;
+                if (xr.NodeType != XmlNodeType.XmlDeclaration) return Encoding.Unicode;
+                var encodingText = xr.GetAttribute("encoding");
+                return encodingText == null ? Encoding.Unicode : Encoding.GetEncoding(encodingText);
             }
         }
 
