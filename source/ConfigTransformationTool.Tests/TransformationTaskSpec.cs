@@ -475,6 +475,15 @@ e"" />
             Check(source, transform, expected, identChars: null);
         }
 
+        [Test]
+        public void AttributeRegexReplace_BasicCase()
+        {
+            string source = El("A", At("a", "aaa-bbb-ccc")).MakeString();
+            string transform = Trans("A", At("xdt:Transform", "AttributeRegexReplace(Attribute='a', Pattern='(a+)-bbb-(c{3})', Replacement='$1-REPLACED-$2')")).MakeString();
+            string expected = El("A", At("a", "aaa-REPLACED-ccc")).MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
         private void Check(string source, string transform, string expected, string identChars = "  ", [CallerMemberName] string testName = "")
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
