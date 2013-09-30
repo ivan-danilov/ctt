@@ -20,11 +20,14 @@ namespace OutcoldSolutions.ConfigTransformationTool
     /// </summary>
     public class TransformationTask
     {
+        private const string DefaultIndentChars = "    ";
+
         private readonly OutputLog log;
 
         private readonly TransformationLogger transfomrationLogger;
 
         private IDictionary<string, string> parameters;
+        private string _indentChars;
 
         /// <summary>
         /// Empty constructor
@@ -38,7 +41,7 @@ namespace OutcoldSolutions.ConfigTransformationTool
 
             this.log = log;
             this.transfomrationLogger = new TransformationLogger(log);
-            this.IndentChars = "    ";
+            this.IndentChars = DefaultIndentChars;
         }
 
         /// <summary>
@@ -86,7 +89,15 @@ namespace OutcoldSolutions.ConfigTransformationTool
         /// <summary>
         /// Gets or sets the character string to use when indenting. 4 spaces is a default value.
         /// </summary>
-        public string IndentChars { get; set; }
+        public string IndentChars
+        {
+            get { return _indentChars; }
+            set
+            {
+                if (value == null) _indentChars = DefaultIndentChars;
+                else _indentChars = value;
+            }
+        }
 
         /// <summary>
         /// Set parameters and values for transform

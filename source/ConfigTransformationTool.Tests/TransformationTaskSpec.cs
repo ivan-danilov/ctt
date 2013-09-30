@@ -438,7 +438,16 @@ e"" />
             Check(source, transform, expected);
         }
 
-        private void Check(string source, string transform, string expected, [CallerMemberName] string testName = "")
+        [Test]
+        public void Transform_IdentCharsNotSpecified_SilentlyAppliesDefaultIndentChars()
+        {
+            string source = El("A").MakeString();
+            string transform = Trans("A", El("Child", At("xdt:Transform", "Merge"))).MakeString();
+            string expected = El("A", El("Child").WithIndent(4)).MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
+        private void Check(string source, string transform, string expected, string identChars = "  ", [CallerMemberName] string testName = "")
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -455,7 +464,7 @@ e"" />
             TransformationTask task = new TransformationTask(this.Log, sourceFile, transformFile, preserveWhitespace: true)
             {
                 Indent = true,
-                IndentChars = "  "
+                IndentChars = identChars
             };
 
             Assert.IsTrue(task.Execute(resultFile));

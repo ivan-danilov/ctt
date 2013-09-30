@@ -58,6 +58,12 @@ namespace OutcoldSolutions.ConfigTransformationTool.Suites
                 sb.Append("\r\n");
         }
 
+        public XmlElementCtor WithIndent(int indentSize)
+        {
+            IndentSize = indentSize;
+            return this;
+        }
+
         public int IndentSize { get; set; }
 
         private int GetLevel()
