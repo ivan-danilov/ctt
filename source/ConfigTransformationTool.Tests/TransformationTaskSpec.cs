@@ -75,7 +75,7 @@ namespace OutcoldSolutions.ConfigTransformationTool.Suites
             Assert.IsTrue(task.Execute(resultFile));
 
             string fileContent = File.ReadAllText(resultFile);
-            
+
             // Check that transformation happend
             Assert.IsTrue(fileContent.Contains(@"value=""601"""));
         }
@@ -144,9 +144,9 @@ namespace OutcoldSolutions.ConfigTransformationTool.Suites
             this.WriteToFile(transformFile, Transform);
 
             var sut = new TransformationTask(this.Log, sourceFile, transformFile, preserveWhitespace: true)
-                {
-                    Indent = true
-                };
+            {
+                Indent = true
+            };
 
             // Act
             var actualResult = sut.Execute(resultFile);
@@ -347,9 +347,9 @@ e"" />
             this.WriteToFile(transformFile, Transform, Encoding.UTF8);
 
             TransformationTask task = new TransformationTask(this.Log, sourceFile, transformFile, preserveWhitespace: true)
-                                          {
-                                              Indent = true
-                                          };
+            {
+                Indent = true
+            };
 
             Assert.IsTrue(task.Execute(resultFile));
 
@@ -435,6 +435,34 @@ e"" />
                                      El("Child", At("xdt:Transform", "Merge"),
                                         El("Subchild"))).MakeString();
             string expected = El("A", El("Child", El("Subchild"))).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_WithOtherTransformationSpecifiedForItsChildAndElementsExist_OtherTransformExecuted()
+        {
+            string source = El("A",
+                               El("Child",
+                                  El("Subchild"))).MakeString();
+            string transform = Trans("A",
+                                     El("Child", At("xdt:Transform", "Merge"),
+                                        El("Subchild", At("my-attr", "my-value"), At("xdt:Transform", "SetAttributes(my-attr)")))).MakeString();
+            string expected = El("A",
+                                 El("Child",
+                                    El("Subchild", At("my-attr", "my-value")))).MakeString();
+            Check(source, transform, expected);
+        }
+
+        [Test]
+        public void Merge_WithOtherTransformationSpecifiedForItsChildAbsentInSource_OtherTransformExecuted()
+        {
+            string source = El("A", El("Child")).MakeString();
+            string transform = Trans("A",
+                                     El("Child", At("xdt:Transform", "Merge"),
+                                        El("Subchild", At("my-attr", "my-value"), At("xdt:Transform", "SetAttributes(my-attr)")))).MakeString();
+            string expected = El("A",
+                                 El("Child",
+                                    El("Subchild", At("my-attr", "my-value")))).MakeString();
             Check(source, transform, expected);
         }
 
