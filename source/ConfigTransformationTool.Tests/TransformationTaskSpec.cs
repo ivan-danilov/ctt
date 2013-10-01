@@ -516,6 +516,15 @@ e"" />
             Check(source, transform, expected, identChars: null);
         }
 
+        [Test]
+        public void AttributeRegexReplace_AttributeIsAbsent_SilentlyIgnored()
+        {
+            string source = El("A").MakeString();
+            string transform = Trans("A", At("xdt:Transform", "AttributeRegexReplace(Attribute='a', Pattern='^$', Replacement='REPLACED')")).MakeString();
+            string expected = El("A").MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
         private void Check(string source, string transform, string expected, bool expectSuccess = true, string identChars = "  ", [CallerMemberName] string testName = "")
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
