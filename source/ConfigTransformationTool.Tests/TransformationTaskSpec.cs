@@ -484,9 +484,9 @@ e"" />
             string transform = Trans("A",
                                      El("Child", At("key", "num2"), At("new", "new-value"), At("xdt:Transform", "Merge(key)"))).MakeString();
             string expected = El("A",
-                               El("Child", At("key", "num1")),
-                               El("Child", At("key", "num2"), At("new", "new-value")),
-                               El("Child", At("key", "num3"))).MakeString();
+                                 El("Child", At("key", "num1")),
+                                 El("Child", At("key", "num2"), At("new", "new-value")),
+                                 El("Child", At("key", "num3"))).MakeString();
             Check(source, transform, expected);
         }
 
@@ -521,6 +521,27 @@ e"" />
         {
             string source = El("A").MakeString();
             string transform = Trans("A", At("xdt:Transform", "AttributeRegexReplace(Attribute='a', Pattern='^$', Replacement='REPLACED')")).MakeString();
+            string expected = El("A").MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
+        [Test]
+        public void RemoveIfEmpty_RemovesEmptyElement()
+        {
+            string source = El("A", El("Child")).MakeString();
+            string transform = Trans("A", El("Child", At("xdt:Transform", "RemoveIfEmpty"))).MakeString();
+            string expected = El("A").MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
+        [Test]
+        public void RemoveIfEmpty_SubchildWasRemovedBefore_RemovesChild()
+        {
+            string source = El("A", El("Child", El("Subchild"))).MakeString();
+            string transform = Trans("A",
+                                     El("Child",
+                                        El("Subchild", At("xdt:Transform", "Remove"))),
+                                     El("Child", At("xdt:Transform", "RemoveIfEmpty"))).MakeString();
             string expected = El("A").MakeString();
             Check(source, transform, expected, identChars: null);
         }

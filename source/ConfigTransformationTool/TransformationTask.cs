@@ -2,6 +2,8 @@
 // Outcold Solutions (http://outcoldman.com)
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Linq;
+
 namespace OutcoldSolutions.ConfigTransformationTool
 {
     using System;
@@ -223,7 +225,12 @@ namespace OutcoldSolutions.ConfigTransformationTool
             {
                 using (var xmlWriter = XmlWriter.Create(buffer, xmlWriterSettings))
                 {
-                    XDocument.Parse(xml).WriteTo(xmlWriter);
+                    var document = XDocument.Parse(xml);
+                    foreach (XElement childElement in document.DescendantNodes()
+                                                              .OfType<XElement>()
+                                                              .Where(x => x.DescendantNodes().All(n => n.NodeType == XmlNodeType.Whitespace)))
+                        childElement.RemoveNodes();
+                    document.WriteTo(xmlWriter);
                 }
 
                 return this.WorkAroundToRestoreProperXmlDeclarationTag(xml, buffer.ToString());

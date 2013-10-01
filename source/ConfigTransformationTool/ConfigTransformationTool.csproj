@@ -77,6 +77,7 @@
     <Compile Include="ArgumentsLoader.cs" />
     <Compile Include="ExtendedTranforms\AttributeRegexReplace.cs" />
     <Compile Include="ExtendedTranforms\Merge.cs" />
+    <Compile Include="ExtendedTranforms\RemoveIfEmpty.cs" />
     <Compile Include="OutputLog.cs" />
     <Compile Include="ParametersLoader.cs" />
     <Compile Include="ParametersParser.cs" />
