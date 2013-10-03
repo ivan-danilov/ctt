@@ -11,6 +11,11 @@ namespace OutcoldSolutions.ConfigTransformationTool.ExtendedTranforms
         private string _replacement;
         private string _attributeName;
 
+        public AttributeRegexReplace()
+            : base(TransformFlags.ApplyTransformToAllTargetNodes)
+        {
+        }
+
         protected string AttributeName
         {
             get { return _attributeName ?? (_attributeName = GetArgumentValue("Attribute")); }
