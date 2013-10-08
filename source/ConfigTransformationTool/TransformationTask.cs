@@ -231,7 +231,8 @@ namespace OutcoldSolutions.ConfigTransformationTool
                     var document = XDocument.Parse(xml);
                     foreach (XElement childElement in document.DescendantNodes()
                                                               .OfType<XElement>()
-                                                              .Where(x => x.DescendantNodes().All(n => n.NodeType == XmlNodeType.Whitespace)))
+                                                              .Where(x => x.FirstNode == null &&
+                                                                          x.Value.All(char.IsWhiteSpace)))
                         childElement.RemoveNodes();
                     document.WriteTo(xmlWriter);
                 }
