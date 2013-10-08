@@ -148,9 +148,11 @@ namespace OutcoldSolutions.ConfigTransformationTool
                                            };
 
                 document.Load(this.SourceFilePath);
+                bool xmlDeclarationPresent = false;
                 if (document.FirstChild.NodeType == XmlNodeType.XmlDeclaration)
                 {
-                    var xmlDeclaration = (XmlDeclaration)document.FirstChild;
+                    xmlDeclarationPresent = true;
+                    var xmlDeclaration = (XmlDeclaration) document.FirstChild;
                     if (!string.IsNullOrEmpty(xmlDeclaration.Encoding))
                     {
                         encoding = Encoding.GetEncoding(xmlDeclaration.Encoding);
@@ -182,7 +184,7 @@ namespace OutcoldSolutions.ConfigTransformationTool
 
                 if (this.Indent)
                 {
-                    outerXml = this.GetIndentedOuterXml(outerXml, encoding);
+                    outerXml = this.GetIndentedOuterXml(outerXml, encoding, omitXmlDeclaration: !xmlDeclarationPresent);
                 }
 
                 if (this.PreserveWhitespace)
@@ -212,13 +214,14 @@ namespace OutcoldSolutions.ConfigTransformationTool
             }
         }
 
-        private string GetIndentedOuterXml(string xml, Encoding encoding)
+        private string GetIndentedOuterXml(string xml, Encoding encoding, bool omitXmlDeclaration)
         {
             var xmlWriterSettings = new XmlWriterSettings
             {
                 Indent = true,
                 IndentChars = this.IndentChars,
-                Encoding = encoding
+                Encoding = encoding,
+                OmitXmlDeclaration = omitXmlDeclaration,
             };
 
             using (var buffer = new StringWriter())

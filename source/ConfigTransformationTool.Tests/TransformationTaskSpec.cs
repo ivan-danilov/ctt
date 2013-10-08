@@ -546,6 +546,15 @@ e"" />
             Check(source, transform, expected, identChars: null);
         }
 
+        [Test]
+        public void TransformationDoesNotInsertXmlDefinitionIfItWasAbsentInOriginalDocument()
+        {
+            string source = El("root").MakeString(xmlDeclaration: null);
+            string transform = Trans("root").MakeString();
+            string expected = source;
+            Check(source, transform, expected);
+        }
+
         private void Check(string source, string transform, string expected, bool expectSuccess = true, string identChars = "  ", [CallerMemberName] string testName = "")
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
