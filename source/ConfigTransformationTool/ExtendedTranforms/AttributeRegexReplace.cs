@@ -73,7 +73,10 @@ namespace OutcoldSolutions.ConfigTransformationTool.ExtendedTranforms
                 if (string.Compare(att.Name, AttributeName, StringComparison.InvariantCultureIgnoreCase) == 0)
                 {
                     // get current value, perform the Regex
-                    att.Value = Regex.Replace(att.Value, Pattern, Replacement);
+                    var oldValue = att.Value;
+                    var newValue = Regex.Replace(oldValue, Pattern, Replacement);
+                    att.Value = newValue;
+                    Log.LogMessage("Attribute {0} replaced from value '{1}' to value '{2}'", AttributeName, oldValue, newValue);
                 }
             }
         }
