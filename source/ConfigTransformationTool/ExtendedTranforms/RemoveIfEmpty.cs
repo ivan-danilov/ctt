@@ -16,8 +16,14 @@ namespace OutcoldSolutions.ConfigTransformationTool.ExtendedTranforms
             if (TargetChildNodes == null) return;
             foreach (var element in TargetChildNodes.OfType<XmlElement>())
             {
-                if (element.Attributes.Count == 0 && element.ChildNodes.Cast<XmlNode>().All(n => n.NodeType == XmlNodeType.Whitespace))
-                    TargetNode.RemoveChild(element);
+                if (element.ChildNodes.Cast<XmlNode>()
+                           .Any(n => n.NodeType != XmlNodeType.Whitespace &&
+                                     n.NodeType != XmlNodeType.Comment &&
+                                     n.NodeType != XmlNodeType.Attribute))
+                {
+                    continue;
+                }
+                TargetNode.RemoveChild(element);
             }
         }
     }

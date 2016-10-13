@@ -535,6 +535,15 @@ e"" />
         }
 
         [Test]
+        public void RemoveIfEmpty_RemovesComments()
+        {
+            string source = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<A><Child><!-- comment --></Child></A>";
+            string transform = Trans("A", El("Child", At("xdt:Transform", "RemoveIfEmpty"))).MakeString();
+            string expected = El("A").MakeString();
+            Check(source, transform, expected, identChars: null);
+        }
+
+        [Test]
         public void RemoveIfEmpty_SubchildWasRemovedBefore_RemovesChild()
         {
             string source = El("A", El("Child", El("Subchild"))).MakeString();
