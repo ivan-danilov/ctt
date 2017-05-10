@@ -114,9 +114,8 @@ namespace OutcoldSolutions.ConfigTransformationTool
         /// Make transformation of file <see cref="SourceFilePath"/> with transform file <see cref="TransformFile"/> to <paramref name="destinationFilePath"/>.
         /// </summary>
         /// <param name="destinationFilePath">File path of destination transformation.</param>
-        /// <param name="forceParametersTask">Invoke parameters task even if the parameters are not set with <see cref="SetParameters" />.</param>
         /// <returns>Return true if transformation finish successfully, otherwise false.</returns>
-        public bool Execute(string destinationFilePath, bool forceParametersTask = false)
+        public bool Execute(string destinationFilePath)
         {
             if (string.IsNullOrWhiteSpace(destinationFilePath))
             {
@@ -143,9 +142,9 @@ namespace OutcoldSolutions.ConfigTransformationTool
                 Encoding encoding = Encoding.Unicode;
 
                 XmlDocument document = new XmlDocument()
-                                           {
-                                               PreserveWhitespace = this.PreserveWhitespace
-                                           };
+                {
+                    PreserveWhitespace = this.PreserveWhitespace
+                };
 
                 document.Load(this.SourceFilePath);
                 bool xmlDeclarationPresent = false;
@@ -165,18 +164,16 @@ namespace OutcoldSolutions.ConfigTransformationTool
 
                 var transformFile = File.ReadAllText(this.TransformFile, transformEncoding);
 
-                if ((this.parameters != null && this.parameters.Count > 0) || forceParametersTask)
+                ParametersTask parametersTask = new ParametersTask();
+                if (this.parameters != null)
                 {
-                    ParametersTask parametersTask = new ParametersTask();
-                    if (this.parameters != null)
-                    {
-                        parametersTask.AddParameters(this.parameters);
-                    }
-
-                    transformFile = parametersTask.ApplyParameters(transformFile);
+                    parametersTask.AddParameters(this.parameters);
                 }
 
-                XmlTransformation transformation = new XmlTransformation(transformFile, false, this.transfomrationLogger);
+                transformFile = parametersTask.ApplyParameters(transformFile);
+
+                XmlTransformation transformation =
+                    new XmlTransformation(transformFile, false, this.transfomrationLogger);
 
                 bool result = transformation.Apply(document);
 

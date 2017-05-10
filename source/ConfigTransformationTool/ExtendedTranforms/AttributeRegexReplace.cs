@@ -76,7 +76,7 @@ namespace OutcoldSolutions.ConfigTransformationTool.ExtendedTranforms
                     var oldValue = att.Value;
                     var newValue = Regex.Replace(oldValue, Pattern, Replacement);
                     att.Value = newValue;
-                    Log.LogMessage("Attribute {0} replaced from value '{1}' to value '{2}'", AttributeName, oldValue, newValue);
+                    Log.LogMessage("Attribute {0} replaced from value '{1}' to value '{2}' by regex '{3}'", AttributeName, oldValue, newValue, Pattern);
                 }
             }
         }

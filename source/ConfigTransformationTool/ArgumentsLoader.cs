@@ -31,8 +31,6 @@ namespace OutcoldSolutions.ConfigTransformationTool
 
         public string ParametersFile { get; private set; }
 
-        public bool ForceParametersTask { get; private set; }
-
         public bool Verbose { get; private set; }
 
         public bool PreserveWhitespace { get; private set; }
@@ -52,7 +50,6 @@ namespace OutcoldSolutions.ConfigTransformationTool
             this.TransformFilePath = string.Empty;
             this.ParametersString = string.Empty;
             this.ParametersFile = string.Empty;
-            this.ForceParametersTask = false;
             this.Verbose = false;
             this.PreserveWhitespace = false;
             this.Indent = false;
@@ -87,11 +84,6 @@ namespace OutcoldSolutions.ConfigTransformationTool
                     || arg.IndexOf("parameters.file:", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     this.ParametersFile = GetValueFromArguments(arg);
-                }
-
-                if (arg.Equals("fpt", StringComparison.OrdinalIgnoreCase))
-                {
-                    this.ForceParametersTask = true;
                 }
 
                 if (arg.Equals("v", StringComparison.OrdinalIgnoreCase) 

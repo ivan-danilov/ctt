@@ -50,7 +50,7 @@ namespace OutcoldSolutions.ConfigTransformationTool
 
                     task.SetParameters(parameters);
 
-                    if (!task.Execute(argumentsLoader.DestinationFilePath, argumentsLoader.ForceParametersTask))
+                    if (!task.Execute(argumentsLoader.DestinationFilePath))
                     {
                         return 4;
                     }
